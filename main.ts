@@ -11,6 +11,21 @@ import { dirname, join } from "node:path";
 const JOKE =
   "Daily standup: fifteen minutes scheduled, forty-five minutes long, and it always ends with 'let's take this offline.'";
 
+// The sealed scorer's gate, checked here before writing so a bad line
+// can never reach /output/entry.txt: UTF-8 text, 1 to 200 characters,
+// a single line, and more than whitespace.
+function gateOk(text: string): boolean {
+  if (text.length < 1 || text.length > 200) return false;
+  if (text.trim().length === 0) return false;
+  if (text.includes("\n") || text.includes("\r")) return false;
+  return true;
+}
+
+if (!gateOk(JOKE)) {
+  console.error(`Joke fails the gate: ${JOKE.length} characters`);
+  process.exit(1);
+}
+
 const outDir = process.env.OUTPUT_DIR ?? "/output";
 const outFile = join(outDir, "entry.txt");
 
